@@ -181,6 +181,7 @@ def splash_server(portnum, slots, network_manager_factory, max_timeout,
     from splash.pool import RenderPool
     from twisted.python import log
     from splash import lua
+    from PyQt5.QtWebKit import QWebSettings
 
     verbosity = defaults.VERBOSITY if verbosity is None else verbosity
     log.msg("verbosity=%d" % verbosity)
@@ -212,6 +213,9 @@ def splash_server(portnum, slots, network_manager_factory, max_timeout,
             onoff[lua_sandbox_enabled],
         )
     )
+    
+    log.msg("Disabling in memory cache")
+    QWebSettings.setObjectCacheCapacities(0, 0, 0)
 
     root = Root(
         pool=pool,
