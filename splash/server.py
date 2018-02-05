@@ -215,6 +215,7 @@ def splash_server(portnum, slots, network_manager_factory, max_timeout,
     )
     
     log.msg("Disabling in memory cache")
+    QWebSettings.setMaximumPagesInCache(0)
     QWebSettings.setObjectCacheCapacities(0, 0, 0)
 
     root = Root(
@@ -236,13 +237,15 @@ def monitor_maxrss(maxrss):
     from twisted.internet import reactor, task
     from twisted.python import log
     from splash.utils import get_ru_maxrss, get_total_phymem
+    from PyQt5.QtWebKit import QWebSettings
 
     # Support maxrss as a ratio of total physical memory
     if 0.0 < maxrss < 1.0:
         maxrss = get_total_phymem() * maxrss / (1024 ** 2)
 
     def check_maxrss():
-        if get_ru_maxrss() > maxrss * (1024 ** 2):
+        currentUsage = get_ru_maxrss()
+        if currentUsage > maxrss * (1024 ** 2):
             log.msg("maxrss exceeded %d MB, shutting down..." % maxrss)
 
             # XXX: for some reason twisted qt5 reactor can stop without
@@ -253,11 +256,18 @@ def monitor_maxrss(maxrss):
             reactor.callLater(2.0, force_shutdown)
 
             reactor.stop()
+        else:
+            if currentUsage > (maxrss * (1024 ** 2)) * (2/3):
+                QWebSettings.clearMemoryCaches()
+                log.msg("used maxrss %d MB, clearing caches..." % (currentUsage / (1024 ** 2)) )
+            else:
+                log.msg("used maxrss %d MB, continuing..." % (currentUsage / (1024 ** 2)) )
+            
 
     if maxrss:
         log.msg("maxrss limit: %d MB" % maxrss)
         t = task.LoopingCall(check_maxrss)
-        t.start(60, now=False)
+        t.start(5, now=False)
 
 
 def default_splash_server(portnum, max_timeout, slots=None,
