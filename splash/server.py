@@ -213,10 +213,13 @@ def splash_server(portnum, slots, network_manager_factory, max_timeout,
             onoff[lua_sandbox_enabled],
         )
     )
-    
-    log.msg("Disabling in memory cache")
-    QWebSettings.setMaximumPagesInCache(0)
-    QWebSettings.setObjectCacheCapacities(0, 0, 0)
+
+    disable_cache = false
+    if disable_cache:
+        log.msg("Disabling in memory cache")
+        QWebSettings.setMaximumPagesInCache(0)
+        QWebSettings.setObjectCacheCapacities(0, 0, 0)
+
 
     root = Root(
         pool=pool,
