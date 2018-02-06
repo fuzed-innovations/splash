@@ -214,7 +214,7 @@ def splash_server(portnum, slots, network_manager_factory, max_timeout,
         )
     )
 
-    disable_cache = false
+    disable_cache = False
     if disable_cache:
         log.msg("Disabling in memory cache")
         QWebSettings.setMaximumPagesInCache(0)
